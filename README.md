@@ -1,5 +1,3 @@
 I'm Willem, an MSc Candidate in **Social Data Science** :chart_with_upwards_trend::computer: at the [Oxford Internet Institute](https://www.oii.ox.ac.uk), **University of Oxford**. In my studies, I apply data science techniques to better understand how humans behave in an increasingly complex, digital world. I am particularly interested in **Nautral Language Processing** techniques. My research focuses on developing cross-lingual transfer learning models for topic classification of political text. 
 
 Previously, I worked at [Picnic Technologies](https://picnic.app/nl/), where I crunched data to advise large FMCG companies on digital and e-commerce strategy. I received my BSc (*Cum Laude*) in Liberal Arts & Sciences from [Leiden University College The Hague](https://www.universiteitleiden.nl/en/governance-and-global-affairs/leiden-university-college-the-hague), with a major in Governance, Economics, and Development, and a minor in Computer Science.
-
-Let's [get in touch](mailto:willem.zents@oii.ox.ac.uk)!
