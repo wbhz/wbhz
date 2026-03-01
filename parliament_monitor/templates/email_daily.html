@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ subject }}</title>
+  <style>
+    /* Reset */
+    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, Helvetica, sans-serif; }
+    table { border-collapse: collapse; }
+
+    /* Layout */
+    .wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+    .container { max-width: 680px; margin: 0 auto; background-color: #ffffff; }
+
+    /* Header */
+    .header { background-color: #002F5F; padding: 24px 32px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 0.5px; }
+    .header p { color: #a0b8d0; margin: 6px 0 0; font-size: 13px; }
+
+    /* Alert bar */
+    .alert-bar { background-color: #C8102E; padding: 10px 32px; color: #ffffff; font-size: 13px; font-weight: bold; }
+
+    /* Stats bar */
+    .stats-bar { background-color: #f0f4f8; border-bottom: 1px solid #dde3ea; padding: 12px 32px; font-size: 12px; color: #556b82; }
+    .stats-bar span { margin-right: 18px; }
+    .stats-bar strong { color: #002F5F; }
+
+    /* Content */
+    .content { padding: 24px 32px; }
+
+    /* Section headers */
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #002F5F;
+      margin: 28px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #002F5F;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* Item cards */
+    .item-card {
+      border: 1px solid #dde3ea;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .item-header {
+      display: flex;
+      align-items: stretch;
+    }
+    .score-badge {
+      min-width: 36px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+      padding: 14px 10px;
+      line-height: 1;
+    }
+    .score-5 { background-color: #C8102E; }
+    .score-4 { background-color: #e35e1b; }
+    .score-3 { background-color: #e8a000; }
+
+    .item-meta { padding: 12px 16px; flex: 1; }
+    .item-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #002F5F;
+      margin: 0 0 4px;
+      line-height: 1.4;
+    }
+    .item-title a { color: #002F5F; text-decoration: none; }
+    .item-title a:hover { text-decoration: underline; }
+
+    .item-attrs { font-size: 11px; color: #778899; margin: 0 0 6px; }
+    .item-source {
+      display: inline-block;
+      background-color: #e8ecf0;
+      color: #002F5F;
+      border-radius: 2px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 6px;
+    }
+    .item-urgency-high { color: #C8102E; font-weight: bold; }
+    .item-urgency-medium { color: #e8a000; font-weight: bold; }
+    .item-urgency-low { color: #778899; }
+
+    .item-body { padding: 0 16px 12px; font-size: 13px; color: #3c4c5c; line-height: 1.55; }
+    .item-tags { padding: 0 16px 10px; }
+    .tag {
+      display: inline-block;
+      background-color: #eef2f7;
+      color: #4a6080;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 10px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+    .action-box {
+      margin: 8px 16px 12px;
+      background-color: #fff8e6;
+      border-left: 3px solid #e8a000;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #5a4000;
+    }
+    .action-box strong { display: block; margin-bottom: 2px; color: #3a2800; }
+
+    /* Bills coming up */
+    .bill-row { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .bill-row:last-child { border-bottom: none; }
+    .bill-stage { font-size: 11px; color: #778899; }
+
+    /* Stats table */
+    .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .stats-table td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+    .stats-table td:first-child { color: #556b82; }
+    .stats-table td:last-child { text-align: right; font-weight: bold; color: #002F5F; }
+
+    /* Footer */
+    .footer {
+      background-color: #002F5F;
+      padding: 16px 32px;
+      font-size: 11px;
+      color: #7090b0;
+      text-align: center;
+    }
+    .footer a { color: #a0b8d0; }
+
+    /* No items */
+    .no-items { color: #778899; font-style: italic; font-size: 13px; padding: 8px 0; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <table class="container" width="680" cellpadding="0" cellspacing="0">
+
+    <!-- Header -->
+    <tr>
+      <td class="header">
+        <h1>Parliament Monitor</h1>
+        <p>City of London Corporation &bull; {{ date_display }}</p>
+      </td>
+    </tr>
+
+    {% if high_items %}
+    <tr>
+      <td class="alert-bar">
+        &#9888; {{ high_items|length }} HIGH RELEVANCE item{{ 's' if high_items|length != 1 }} require attention
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Stats bar -->
+    <tr>
+      <td class="stats-bar">
+        <span>Scanned: <strong>{{ stats.total_scanned }}</strong></span>
+        <span>Flagged: <strong>{{ stats.total_flagged }}</strong></span>
+        <span>Sources: <strong>{{ stats.sources_active }}</strong></span>
+        {% if stats.processing_time_s %}
+        <span>Generated in: <strong>{{ "%.0f"|format(stats.processing_time_s) }}s</strong></span>
+        {% endif %}
+      </td>
+    </tr>
+
+    <!-- Body -->
+    <tr>
+      <td class="content">
+
+        <!-- High Relevance -->
+        <div class="section-title">&#128308; High Relevance — Score 5</div>
+        {% if high_items %}
+          {% for si in high_items %}
+            {% include 'partials/item_card.html' %}
+          {% endfor %}
+        {% else %}
+          <p class="no-items">No items scored 5 today.</p>
+        {% endif %}
+
+        <!-- Notable -->
+        <div class="section-title">&#128992; Notable — Score 4</div>
+        {% if notable_items %}
+          {% for si in notable_items %}
+            {% include 'partials/item_card.html' %}
+          {% endfor %}
+        {% else %}
+          <p class="no-items">No items scored 4 today.</p>
+        {% endif %}
+
+        <!-- Worth Noting -->
+        <div class="section-title">&#128993; Worth Noting — Score 3</div>
+        {% if worth_noting_items %}
+          {% for si in worth_noting_items %}
+            {% include 'partials/item_card.html' %}
+          {% endfor %}
+        {% else %}
+          <p class="no-items">No items scored 3 today.</p>
+        {% endif %}
+
+        <!-- Coming Up (Bills) -->
+        {% if coming_up_bills %}
+        <div class="section-title">&#128197; Coming Up — Bills Approaching Stages</div>
+        {% for bill in coming_up_bills %}
+        <div class="bill-row">
+          <div style="font-size:13px; font-weight:bold; color:#002F5F;">
+            <a href="{{ bill.item.url }}" style="color:#002F5F; text-decoration:none;">{{ bill.item.title }}</a>
+          </div>
+          <div class="bill-stage">
+            {{ bill.item.extra.get('stage', '') }}
+            {% if bill.item.extra.get('next_sitting') %}
+            &bull; Next sitting: {{ bill.item.extra.next_sitting }}
+            {% endif %}
+            &bull; {{ bill.item.extra.get('house', '') }}
+          </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Stats -->
+        <div class="section-title">&#128202; Statistics</div>
+        <table class="stats-table">
+          <tr><td>Items scanned</td><td>{{ stats.total_scanned }}</td></tr>
+          <tr><td>Items flagged (&ge;3)</td><td>{{ stats.total_flagged }}</td></tr>
+          <tr><td>Score 5 (High)</td><td>{{ stats.score_5 }}</td></tr>
+          <tr><td>Score 4 (Notable)</td><td>{{ stats.score_4 }}</td></tr>
+          <tr><td>Score 3 (Worth Noting)</td><td>{{ stats.score_3 }}</td></tr>
+          {% for source, count in stats.by_source.items() %}
+          <tr><td>{{ source | capitalize }} items</td><td>{{ count }}</td></tr>
+          {% endfor %}
+        </table>
+
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td class="footer">
+        Parliament Monitor &bull; City of London Corporation &bull; Generated {{ generated_at }}<br>
+        <a href="https://github.com">View on GitHub</a>
+      </td>
+    </tr>
+
+  </table>
+</div>
+</body>
+</html>

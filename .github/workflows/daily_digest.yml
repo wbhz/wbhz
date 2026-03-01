@@ -1,0 +1,147 @@
+name: Parliament Monitor – Daily Digest
+
+on:
+  # Weekdays at 07:00 UTC (before UK working hours)
+  schedule:
+    - cron: '0 7 * * 1-5'
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Target date (YYYY-MM-DD). Leave empty for yesterday.'
+        required: false
+        default: ''
+      no_email:
+        description: 'Skip sending email (true/false)'
+        required: false
+        default: 'false'
+      run_weekly:
+        description: 'Also run weekly synthesis (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  daily-digest:
+    name: Daily Digest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv pip install --system -e .
+
+      - name: Determine date argument
+        id: date-arg
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            echo "DATE_ARG=--date ${{ github.event.inputs.date }}" >> $GITHUB_OUTPUT
+          else
+            echo "DATE_ARG=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine email flag
+        id: email-flag
+        run: |
+          if [ "${{ github.event.inputs.no_email }}" = "true" ]; then
+            echo "EMAIL_FLAG=--no-email" >> $GITHUB_OUTPUT
+          else
+            echo "EMAIL_FLAG=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run daily digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+        run: |
+          python scripts/run_daily.py \
+            ${{ steps.date-arg.outputs.DATE_ARG }} \
+            ${{ steps.email-flag.outputs.EMAIL_FLAG }} \
+            --log-level INFO
+
+      - name: Commit digest output
+        run: |
+          git config user.name "Parliament Monitor Bot"
+          git config user.email "parliament-monitor@users.noreply.github.com"
+          git add outputs/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: daily digest $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+  weekly-synthesis:
+    name: Weekly Synthesis
+    runs-on: ubuntu-latest
+    # Run on Fridays at 16:00 UTC, or when manually triggered
+    if: |
+      (github.event_name == 'schedule' && startsWith(github.event.schedule, '0 16 * * 5')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_weekly == 'true')
+    needs: daily-digest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Pull latest (includes today's daily digest)
+        run: git pull
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv pip install --system -e .
+
+      - name: Run weekly synthesis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+        run: |
+          python scripts/run_weekly.py --log-level INFO
+
+      - name: Commit weekly output
+        run: |
+          git config user.name "Parliament Monitor Bot"
+          git config user.email "parliament-monitor@users.noreply.github.com"
+          git add outputs/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: weekly synthesis $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+---
+# Separate workflow trigger for Friday 16:00 UTC weekly synthesis
+# This overrides the schedule above because GitHub Actions doesn't support
+# multiple schedules in one job conditional cleanly.

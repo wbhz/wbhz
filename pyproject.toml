@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "parliament-monitor"
+version = "0.1.0"
+description = "Automated UK Parliament monitoring for the City of London Corporation"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27.0",
+    "anthropic>=0.40.0",
+    "jinja2>=3.1.4",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.9.0",
+    "sendgrid>=6.11.0",
+    "tenacity>=9.0.0",
+    "feedparser>=6.0.11",
+    "rich>=13.9.0",
+]
+
+[project.scripts]
+run-daily = "scripts.run_daily:main"
+run-weekly = "scripts.run_weekly:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["parliament_monitor", "scripts"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]

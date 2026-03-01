@@ -1,0 +1,78 @@
+name: Parliament Monitor – Weekly Synthesis
+
+on:
+  # Fridays at 16:00 UTC (after the afternoon digest)
+  schedule:
+    - cron: '0 16 * * 5'
+  # Also triggerable manually
+  workflow_dispatch:
+    inputs:
+      week_ending:
+        description: 'Week-ending Friday date (YYYY-MM-DD). Leave empty for most recent Friday.'
+        required: false
+        default: ''
+      no_email:
+        description: 'Skip sending email (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  weekly-synthesis:
+    name: Weekly Synthesis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pull latest commits (includes today's daily digest)
+        run: git pull
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv pip install --system -e .
+
+      - name: Determine arguments
+        id: args
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.week_ending }}" ]; then
+            ARGS="$ARGS --week-ending ${{ github.event.inputs.week_ending }}"
+          fi
+          if [ "${{ github.event.inputs.no_email }}" = "true" ]; then
+            ARGS="$ARGS --no-email"
+          fi
+          echo "ARGS=$ARGS" >> $GITHUB_OUTPUT
+
+      - name: Run weekly synthesis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+        run: |
+          python scripts/run_weekly.py ${{ steps.args.outputs.ARGS }} --log-level INFO
+
+      - name: Commit weekly output
+        run: |
+          git config user.name "Parliament Monitor Bot"
+          git config user.email "parliament-monitor@users.noreply.github.com"
+          git add outputs/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: weekly synthesis $(date -u +%Y-%m-%d)"
+            git push
+          fi
