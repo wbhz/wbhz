@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ subject }}</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, Helvetica, sans-serif; }
+    table { border-collapse: collapse; }
+    .wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+    .container { max-width: 680px; margin: 0 auto; background-color: #ffffff; }
+    .header { background-color: #002F5F; padding: 24px 32px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 22px; font-weight: bold; }
+    .header p { color: #a0b8d0; margin: 6px 0 0; font-size: 13px; }
+    .accent-bar { background-color: #C8102E; height: 4px; }
+    .content { padding: 28px 32px; }
+    h2 { color: #002F5F; font-size: 16px; margin: 28px 0 12px; padding-bottom: 6px;
+         border-bottom: 2px solid #C8102E; text-transform: uppercase; letter-spacing: 0.5px; }
+    h2:first-child { margin-top: 0; }
+    p { font-size: 13px; color: #3c4c5c; line-height: 1.6; margin: 0 0 12px; }
+    ul { margin: 0 0 14px; padding-left: 20px; }
+    li { font-size: 13px; color: #3c4c5c; line-height: 1.6; margin-bottom: 6px; }
+    .bill-card { border: 1px solid #dde3ea; border-radius: 4px; padding: 12px 16px; margin-bottom: 10px; }
+    .bill-card strong { color: #002F5F; font-size: 13px; }
+    .bill-card small { color: #778899; font-size: 11px; display: block; margin-top: 4px; }
+    .action-list { background-color: #fff8e6; border-left: 4px solid #C8102E;
+                   padding: 14px 18px; margin: 0 0 18px; border-radius: 0 4px 4px 0; }
+    .action-list li { color: #3a2800; }
+    .footer { background-color: #002F5F; padding: 16px 32px; font-size: 11px;
+              color: #7090b0; text-align: center; }
+    .footer a { color: #a0b8d0; }
+    pre { white-space: pre-wrap; word-break: break-word; font-family: Arial, Helvetica, sans-serif;
+          font-size: 13px; color: #3c4c5c; line-height: 1.6; margin: 0; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <table class="container" width="680" cellpadding="0" cellspacing="0">
+    <tr>
+      <td class="header">
+        <h1>Weekly Briefing</h1>
+        <p>City of London Corporation &bull; Week ending {{ week_ending }}</p>
+      </td>
+    </tr>
+    <tr><td class="accent-bar"></td></tr>
+    <tr>
+      <td class="content">
+        <pre>{{ synthesis_text }}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td class="footer">
+        Parliament Monitor &bull; City of London Corporation &bull; Generated {{ generated_at }}<br>
+        <a href="https://github.com">View on GitHub</a>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>
